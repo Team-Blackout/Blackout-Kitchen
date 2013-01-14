@@ -76,8 +76,41 @@ then
   cp -f ../tools/deodex_files/baksmali-$version.jar baksmali.jar
   cp -f ../tools/deodex_files/smali-$version.jar smali.jar
 
-  ../scripts/do_deodex_file $api_level $file_chosen system/framework
-  result=$?
+  try_again=y
+
+  while [ "$try_again" != "n" ]
+  do
+    echo
+    echo "Enter any JAR file dependencies separated by colon (Enter=none)."
+		echo "NOTE: To ignore errors, type 'ignore' by itself or after dependencies"
+		echo    
+		echo -n "$file_chosen > "
+    read classfiles
+    echo
+
+		if [ "$classfiles" == "ignore" ]
+		then
+			classfiles="none yes"
+		else
+			classfiles=`echo $classfiles | sed -e 's/ ignore/ yes/g'`
+		fi
+
+    ../scripts/do_deodex_file $api_level $file_chosen system/framework $classfiles 
+
+    result=$?
+
+    if [ "$result" == 1 ]
+    then
+      echo
+      echo -n "Try $file_chosen again (y/n)? (default: y): "
+      read try_again
+      echo
+    else
+      break
+    fi
+
+  done
+
   rm -f *smali.jar
 
 fi

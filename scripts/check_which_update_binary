@@ -1,6 +1,6 @@
 ############################################################################
 #
-# Copyright (c) 2011 - dsixda (dislam@rocketmail.com)
+# Copyright (c) 2012 - dsixda (dislam@rocketmail.com)
 #
 # Android Kitchen is 100% free.  This script file is intended for personal
 # and/or educational use only.  It may not be duplicated for monetary
@@ -10,6 +10,7 @@
 
 
 cd WORKING_*
+working_folder=`pwd`
 cd META-INF/com/google/android
 update_dir=`pwd`
 
@@ -38,8 +39,26 @@ else
   cd ../../../../..
   scripts/check_galaxy_s2
   sgs2=$?
-  scripts/check_galaxy_s2x
-  sgs2x=$?
+
+  if [ "$sgs2" != "1" ]
+  then
+    scripts/check_galaxy_s2x
+    sgs2x=$?
+    
+    if [ "$sgs2x" != "1" ]
+    then
+      scripts/check_galaxy_s3_common
+      sgs3_common=$?
+
+      if [ "$sgs3_common" != "1" ] && [ -e $working_folder/boot.img ]
+      then
+        scripts/check_mt65xx_bootimg
+        mt65xx=$?
+      fi
+    fi
+  fi
+  
+  device_name=`scripts/get_device_name`
 
   cd $update_dir
 
@@ -50,6 +69,15 @@ else
   then
     
     cp -vf ../../../../../tools/update_files/sgs2-update-binary update-binary
+
+  elif [ "$sgs3_common" == "1" ]
+  then
+
+    cp -vf ../../../../../tools/update_files/sgs3-update-binary update-binary
+
+  elif [ "$device_name" == "GT-I9103" ]
+  then
+    cp -vf ../../../../../tools/update_files/emmc-not-neon-update-binary update-binary
 
   else
 
@@ -65,8 +93,12 @@ else
       # e.g. mount("yaffs2", "MTD", "userdata", "/data");
       #
 
-      cp -vf ../../../../../tools/update_files/emmc-update-binary update-binary
-
+      if [ "$mt65xx" == "1" ]
+      then
+        cp -vf ../../../../../tools/update_files/emmc-mt65xx-update-binary update-binary
+      else
+        cp -vf ../../../../../tools/update_files/emmc-update-binary update-binary
+      fi
    
     else
 

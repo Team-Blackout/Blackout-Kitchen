@@ -1,6 +1,6 @@
 ############################################################################
 #
-# Copyright (c) 2011 - dsixda (dislam@rocketmail.com)
+# Copyright (c) 2012 - dsixda (dislam@rocketmail.com)
 #
 # Android Kitchen is 100% free.  This script file is intended for personal
 # and/or educational use only.  It may not be duplicated for monetary
@@ -32,19 +32,22 @@ then
   cd ..
 
 else
+  echo "No working folder found!"
   exit 0
 fi
 
+echo
+echo -n "Please wait "
 
 #
 # Check if Samsung Galaxy S/S2
 #
 
+echo -n "."
 scripts/check_galaxy_s_and_s2
 is_galaxy_ss2=$?
-scripts/check_galaxy_s2x
-is_galaxy_s2x=$?
 
+echo -n "."
 if [ "$is_galaxy_ss2" == "1" ]
 then
   scripts/extract_initramfs
@@ -62,6 +65,16 @@ fi
 clear
 echo
 echo -n "Please wait "
+
+echo -n "."
+scripts/check_galaxies
+is_galaxies=$?
+echo -n "."
+scripts/check_galaxy_s3_exynos
+is_galaxy_s3_exynos=$?
+echo -n "."
+scripts/check_gnote2_common
+is_gnote2_common=$?
 
 
 #
@@ -121,7 +134,7 @@ cd WORKING_*
 if [ "`find . -name su`" == "" ] 
 then
   su_status=NO
-elif [ "`find . -iname Superuser.apk`" == "" ]
+elif [ "`find . -iname Superuser.apk`" == "" ] && [ "`find . -iname SuperSU.apk`" == "" ]
 then
   su_status=NO
 else
@@ -299,7 +312,7 @@ cd WORKING_*
 
 show_csc=no
 
-if [ -e system/CSCVersion.txt ] || [ "$is_galaxy_ss2" == "1" ] || [ "$is_galaxy_s2x" == "1" ] || [ "$device_name" == "GT-I9001" ]
+if [ -e system/CSCVersion.txt ] || [ "$device_name" == "GT-I9001" ] || [ "$is_galaxies" == "1" ]
 then
 
   show_csc=yes
@@ -318,7 +331,7 @@ cd ..
 
 
 
-if [ "$is_galaxy_ss2" == "1" ]
+if [ "$is_galaxy_ss2" == "1" ] || [ "$is_galaxy_s3_exynos" == "1" ] || [ "$is_gnote2_common" == "1" ]
 then
 
   #
@@ -457,7 +470,7 @@ then
   echo " CSC version                    : $csc_version"
 fi
 
-echo " Rooted (Superuser.apk + su)    : $su_status"
+echo " Rooted (Superuser app + su)    : $su_status"
 echo " Rooted (unsecured boot.img)    : $unsecure_status"                                         
 echo " BusyBox installed              : $bb_status"
 echo " BusyBox run-parts support      : $runparts_status"
@@ -474,10 +487,10 @@ echo " Bash shell support             : $bash_status"
 echo " /system/framework is deodexed  : $deodex_fr_status"
 echo " /system/app is deodexed        : $deodex_app_status"
 
-if [ "$is_galaxy_ss2" == "1" ]
+if [ "$is_galaxy_ss2" == "1" ] || [ "$is_galaxy_s3_exynos" == "1" ] || [ "$is_gnote2_common" == "1" ]
 then
   echo " modem.bin found                : $modem_status"
-elif [ "$is_galaxy_s2x" != "1" ]
+elif [ "$is_galaxies" != "1" ]
 then
   echo " radio.img found                : $radio_status"
 fi

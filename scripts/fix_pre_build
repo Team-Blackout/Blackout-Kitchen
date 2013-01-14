@@ -21,10 +21,9 @@ then
 
 elif [ ! -e META-INF/com/google/android/update-script ] && [ ! -e META-INF/com/google/android/updater-script ]
 then
-  echo "Warning: update-script/updater-script not found"
-  echo
   cd ..
-  exit 0
+  scripts/check_no_update_script
+  cd WORKING_*
 
 elif [ -e META-INF/com/google/android/updater-script ]
 then
@@ -312,9 +311,14 @@ then
   cd ..
   scripts/check_galaxy_s2
   res=$?
+  scripts/check_galaxy_s3_exynos
+  res2=$?
+  scripts/check_gnote2_common
+  res3=$?
+
   cd WORKING_*
 
-  if [ "$res" == "1" ] && [ ! -e flash_image ]
+  if [[ "$res" == "1" || "$res2" == "1" || "$res3" == "1" ]] && [[ ! -e flash_image ]]
   then
     echo "Adding flash_image to ROM ..."
     cp ../tools/samsung_files/flash_image .
@@ -361,6 +365,13 @@ then
   cp -f system/fonts/Roboto-Bold.ttf system/fonts/DroidSans-Bold.ttf
 fi
 
+
+#
+# Prima WLAN
+#
+cd ..
+scripts/fix_prima_wifi
+cd WORKING_*
 
 
 #
@@ -426,6 +437,24 @@ then
     cp ../tools/check_data_app .
   else
     echo "check_data_app already exists"
+    echo
+  fi
+fi
+
+
+
+#
+# Check for /preload app symlinks (Galaxy S2 hidden.img)
+#
+
+if [ -d preload/symlink/system/app ]
+then
+  if [ ! -e create_preload_symlinks ]
+  then
+    echo "Adding create_preload_symlinks to working folder"
+    cp ../tools/samsung_files/create_preload_symlinks .
+  else
+    echo "create_preload_symlinks already exists"
   fi
 fi
 

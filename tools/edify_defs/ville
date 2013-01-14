@@ -8,9 +8,10 @@ param2=EMMC
 param1_sdcard=vfat
 param2_sdcard=MTD
 
-sys_mnt=\/dev\/block\/mmcblk0p32
-cache_mnt=\/dev\/block\/mmcblk0p33
-boot_mnt=\/dev\/block\/mmcblk0p20
-data_mnt=\/dev\/block\/mmcblk0p34
-sdcard_mnt=\/dev\/block\/mmcblk0p35
+sys_mnt=\/dev\/block\/mmcblk0p33
+cache_mnt=\/dev\/block\/mmcblk0p34
+boot_mnt=\/dev\/block\/mmcblk0p21
+data_mnt=\/dev\/block\/mmcblk0p35
+sdcard_mnt=\/dev\/block\/mmcblk0p36
 
+fix_boot3=yes

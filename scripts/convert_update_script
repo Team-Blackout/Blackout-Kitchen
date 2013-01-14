@@ -1,6 +1,6 @@
 ############################################################################
 #
-# Copyright (c) 2011 - dsixda (dislam@rocketmail.com)
+# Copyright (c) 2012 - dsixda (dislam@rocketmail.com)
 #
 # Android Kitchen is 100% free.  This script file is intended for personal
 # and/or educational use only.  It may not be duplicated for monetary
@@ -49,8 +49,8 @@ then
   echo 
   echo "This option will also be given when you build your ROM, so it is"
   echo "not necessary to convert your update-script now.  The kitchen is NOT"
-  echo "compatible with updater-scripts, so only the 'Build ROM' option "
-  echo "should be used afterwards if you have an updater-script."
+  echo "compatible with updater-scripts, so only a few options can be used "
+  echo "afterwards if you have an updater-script."
   echo
   echo "Ensure you have an update-script under META-INF/com/google/android"
   echo "of your working folder."
@@ -131,9 +131,9 @@ echo
 
 cp update-script updater-script
 
-orig_list=( DATA SYSTEM CACHE SDEXT BOOT SDCARD )
-new_list=( userdata system cache sdext boot sdcard )
-new_list_str="0 1 2 3 4 5"
+orig_list=( DATA SYSTEM PRELOAD CACHE SDEXT BOOT SDCARD )
+new_list=( userdata system preload cache sdext boot sdcard )
+new_list_str="0 1 2 3 4 5 6"
 
 
 echo "- Initial formatting ..."
@@ -147,11 +147,13 @@ scripts/check_galaxy_s_and_s2
 ss2=$?
 scripts/check_galaxy_s2x
 s2x=$?
+scripts/check_galaxy_s3_common
+s3_common=$?
 
 cd WORKING_*
 cd META-INF/com/google/android
 
-if [ "$ss2" == "1" ] || [ "$s2x" == "1" ]
+if [ "$ss2" == "1" ] || [ "$s2x" == "1" ] || [ "$s3_common" == "1" ]
 then
   sed -i -e 's/format /delete_recursive /g' updater-script
 fi
@@ -248,6 +250,7 @@ sed -i \
   -e 's/\(package_extract_dir.*\) \(.*\)/\1", "\2/g' \
   -e 's/\(package_extract_dir.*\)PACKAGE:/\1/g' \
   -e 's/\(package_extract_dir.*\)SYSTEM:\([^)]*\))/\1\/system\/\2)/g' \
+  -e 's/\(package_extract_dir.*\)PRELOAD:\([^)]*\))/\1\/preload\/\2)/g' \
   -e 's/\(package_extract_dir.*\)DATA:\([^)]*\))/\1\/data\/\2)/g' \
   -e 's/\(package_extract_dir.*\)TMP:\([^)]*\))/\1\/tmp\/\2)/g' \
   -e 's/\(package_extract_dir.*\)SDCARD:\([^)]*\))/\1\/sdcard\/\2)/g' \
@@ -375,6 +378,17 @@ sed -i \
 
 
 #
+# sleep
+#
+echo "- sleep ..."
+
+sed -i \
+  -e 's/sleep \(.*\)/sleep(\1);/g' \
+  updater-script
+
+
+
+#
 # delete / delete_recursive
 #
 echo "- delete/delete_recursive ..."
@@ -383,6 +397,7 @@ sed -i \
   -e 's/delete \(.*\)/delete(\"\1\");/g' \
   -e 's/delete_recursive \(.*\)/delete_recursive(\"\1\");/g' \
   -e 's/\(delete.*\)SYSTEM:/\1\/system\//g' \
+  -e 's/\(delete.*\)PRELOAD:/\1\/preload\//g' \
   -e 's/\(delete.*\)DATA:/\1\/data\//g' \
   -e 's/\(delete.*\)SDCARD:/\1\/sdcard\//g' \
   -e 's/\(delete.*\)CACHE:/\1\/cache\//g' \
@@ -754,6 +769,28 @@ cd META-INF/com/google/android
 sed -i -e '/^$/d' updater-script
 
 
+test_mnt=`grep "^mount(" updater-script`
+test_mnt2=`grep "sbin/mount\", \"" updater-script`
+
+if [ "$test_mnt" != "" ] || [ "$test_mnt2" != "" ]
+then
+  echo 
+  echo
+  echo "Please ensure these device mount statements are correct:"
+  echo "--------------------------------------------------------------------------"  
+
+  if [ "$test_mnt" != "" ]
+  then
+    grep "^mount(" updater-script
+  fi
+
+  if [ "$test_mnt2" != "" ]
+  then 
+    grep "sbin/mount\", \"" updater-script
+  fi
+
+  echo "--------------------------------------------------------------------------"
+fi
 
 
 if [ -e updater-script ]

@@ -1,6 +1,6 @@
 ############################################################################
 #
-# Copyright (c) 2011 - dsixda (dislam@rocketmail.com)
+# Copyright (c) 2012 - dsixda (dislam@rocketmail.com)
 #
 # Android Kitchen is 100% free.  This script file is intended for personal
 # and/or educational use only.  It may not be duplicated for monetary
@@ -45,11 +45,12 @@ echo "Creating working folder $build_dir ..."
 mkdir $build_dir
 
 echo
-echo "Extracting ROM ..."
+echo "Extracting ROM from TAR file ..."
 
 tar xvf original_update/$update_file -C $build_dir -x factoryfs.img cache.img modem.bin \
       zImage factoryfs.rfs cache.rfs PDA.tar.md5 CSC.tar.md5 PHONE.tar.md5 PDA.tar CSC.tar \
-      PHONE.tar system.img.ext4 cache.img.ext4 boot.img system 2>/dev/null
+      PHONE.tar system.img system.img.ext4 system.rfs cache.img.ext4 boot.img csc.rfs \
+      system hidden.img 2>/dev/null
 
 cd $build_dir
 
@@ -69,13 +70,15 @@ then
   scripts/simg_files_to_working_folder no_create $2
   exit $?
 
-elif [ -e system.img.ext4 ]
+elif [ -e system.img ]
 then
 
-  if [ -e boot.img ]
-  then
-    echo "Found boot.img"
-  fi
+  cd ..
+  scripts/img_files_to_working_folder no_create $2
+  exit $?
+
+elif [ -e system.img.ext4 ]
+then
 
   cd ..
   scripts/simg_ext4_files_to_working_folder no_create $2
@@ -90,6 +93,14 @@ then
     scripts/show_rooted_kernel_msg
     cd $build_dir
   fi
+
+  cd ..
+  scripts/rfs_files_to_working_folder no_create $2
+  exit $?
+
+
+elif [ -e system.rfs ]
+then
 
   cd ..
   scripts/rfs_files_to_working_folder no_create $2
